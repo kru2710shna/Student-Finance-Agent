@@ -22,9 +22,21 @@ with st.sidebar:
         text = ocr_engine.extract_text(uploaded_file)
         st.success("Receipt uploaded and processed ✅")
 
-        # Categorize using Claude/Groq
+        # Categorize using Groq API (or fallback)
         category, insights = categorizer.categorize_and_analyze(text)
         amount = finance_utils.extract_amount(text)
+
+        # ✅ Smart Categorization Learning (user correction)
+        corrected_category = st.selectbox(
+            "Is this category correct?",
+            ["Housing", "Food", "Transport", "Education", "Subscription", "Misc"],
+            index=["Housing", "Food", "Transport", "Education", "Subscription", "Misc"].index(category)
+            if category in ["Housing", "Food", "Transport", "Education", "Subscription", "Misc"] else 5
+        )
+        if corrected_category != category:
+            st.info(f"Updated category from {category} → {corrected_category}")
+            categorizer.save_correction(text, corrected_category)
+            category = corrected_category  # overwrite before saving
 
         # Save locally
         storage.save_expense({
@@ -36,7 +48,7 @@ with st.sidebar:
         })
 
         st.write("🧾 OCR Extracted:", text)
-        st.write(f"📂 Category: {category}")
+        st.write(f"📂 Final Category: {category}")
         st.write(f"💡 Insight: {insights}")
 
     st.markdown("---")
@@ -99,6 +111,28 @@ if expenses:
     # Split Bills
     st.subheader("👥 Split Bills Summary")
     st.table(finance_utils.split_bills(df, roommates=roommates))
+
+    # -----------------------------
+    # Agentic Features
+    # -----------------------------
+    # Scenario Chat
+    st.subheader("🤖 Scenario Chat – Ask What-If Questions")
+    user_query = st.text_input("Example: 'What if I spend $200 more on food next month?'")
+    if user_query:
+        try:
+            scenario_answer = categorizer.run_scenario_chat(user_query, expenses)
+            st.success(f"💬 Agent: {scenario_answer}")
+        except Exception as e:
+            st.error(f"Scenario planning failed: {e}")
+
+    # Smart Categorization Log
+    st.subheader("📘 Learning Log (Corrections Applied)")
+    corrections = categorizer.load_corrections()
+    if corrections:
+        corr_df = pd.DataFrame(list(corrections.items()), columns=["Vendor/Keyword", "Corrected Category"])
+        st.table(corr_df)
+    else:
+        st.info("No corrections learned yet.")
 
 else:
     st.info("No expenses yet. Upload receipts to get started!")

@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-
+import json 
 # Try loading .env if present
 load_dotenv()
 
@@ -81,3 +81,32 @@ def categorize_and_analyze(text: str):
 
     insight = f"This looks like a {category} expense."
     return category, insight
+
+
+
+CORRECTIONS_FILE = "data/category_corrections.json"
+
+def save_correction(vendor_text: str, category: str):
+    """Save user correction so the agent learns."""
+    if not os.path.exists("data"):
+        os.makedirs("data")
+    corrections = {}
+    if os.path.exists(CORRECTIONS_FILE):
+        with open(CORRECTIONS_FILE, "r") as f:
+            try:
+                corrections = json.load(f)
+            except:
+                corrections = {}
+    corrections[vendor_text.lower()] = category
+    with open(CORRECTIONS_FILE, "w") as f:
+        json.dump(corrections, f, indent=4)
+
+def load_corrections():
+    """Load saved corrections."""
+    if not os.path.exists(CORRECTIONS_FILE):
+        return {}
+    try:
+        with open(CORRECTIONS_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {}
