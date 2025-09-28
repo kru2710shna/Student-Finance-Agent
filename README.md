@@ -107,6 +107,9 @@ CFOs at the enterprise level.
 
 ------------------------------------------------------------------------
 
+## DEMO
+🎥 Demo → [Watch Demo Video]([https://drive.google.com/file/d/1A9h-YypFQQ0RZXPYxjwi_QpIGAUV0myn/view?usp=sharing](https://drive.google.com/file/d/19YMI-heNxQAKnC74Y6JB9YoWp75FW-cI/view))
+
 ## 🌍 Broad Use Cases
 
 -   **Students**: Track tuition, rent, groceries, and shared bills
