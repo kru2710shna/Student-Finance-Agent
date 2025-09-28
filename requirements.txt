@@ -1,0 +1,9 @@
+streamlit
+pytesseract
+pillow
+opencv-python
+plotly
+pandas
+requests
+groq
+python-dotenv
